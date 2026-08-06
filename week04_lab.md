@@ -12,16 +12,16 @@
 เมื่อจบใบงานนี้ นักศึกษาจะสามารถ:
 
 1. ใช้ Layout Widgets หลัก (`Row`, `Column`, `Stack`, `GridView`, `ListView`) ได้อย่างถูกต้อง
-2. สร้าง Responsive Layout ที่ปรับขนาดตามหน้าจอด้วย `LayoutBuilder` และ `MediaQuery`
-3. ตั้งค่า Navigation แบบ Multi-screen ด้วย **Go Router** พร้อม Named Route
-4. ส่งผ่านข้อมูล (Arguments) ระหว่าง Screen ได้
-5. ออกแบบ Navigation Hierarchy ที่เหมาะสมสำหรับ Mobile App
+2. สร้าง Responsive Layout ที่ปรับขนาดตามหน้าจอโดยอ้างอิงมาตรฐาน Material Design 3 (Window Size Classes) ด้วย `LayoutBuilder` และ `MediaQuery`
+3. ตั้งค่า Navigation แบบ Multi-screen ด้วย **Go Router** พร้อม Named Routes และ `StatefulShellRoute`
+4. ส่งผ่านข้อมูล (Arguments / Path Parameters) ระหว่าง Screen และจัดการ Fallback กรณี Deep Link / Web Refresh ได้อย่างถูกต้อง
+5. ออกแบบ Navigation Hierarchy ที่เหมาะสมสำหรับ Mobile และ Web Application
 
 ---
 
 ## 🧪 ทฤษฎีก่อนการทดลอง
 
-### ส่วนที่ 1 — Flutter Layout System
+### ส่วนที่ 1 — Flutter Layout System & Material Design 3 Breakpoints
 
 Flutter ใช้ **Constraint-based Layout** โดยมีกระบวนการทำงาน 3 ขั้น:
 
@@ -45,7 +45,7 @@ Parent → จัดวางตำแหน่ง Child ตาม Size ที�
 | `Container` | Box Model ครบ (padding, margin, border, color) | หลายคุณสมบัติ |
 | `GridView` | แสดง Items เป็น Grid | `crossAxisCount`, `crossAxisSpacing` |
 | `ListView` | แสดง Items เป็น List แบบ Scrollable | `builder`, `itemCount` |
-| `LayoutBuilder` | รับ Constraints ของ Parent | `BoxConstraints` |
+| `LayoutBuilder` | รับ Constraints ของ Parent เพื่อทำ Responsive | `BoxConstraints` |
 
 **Alignment ใน Row และ Column:**
 
@@ -74,38 +74,48 @@ Row(
 )
 ```
 
+**📐 มาตรฐาน Window Size Classes ของ Material Design 3 (M3):**
+
+ในการออกแบบ Responsive Layout บน M3 จะใช้ความกว้างหน้าจอ (Width Breakpoints) แบ่งออกเป็น 3 ระดับหลัก:
+
+- **Compact (< 600 dp):** มือถือแนวตั้ง (Phone Portrait) — แนะนำใช้ Grid 2 Columns หรือ List 1 Column, ใช้ Bottom Navigation Bar
+- **Medium (600 dp – 839 dp):** แท็บเล็ตแนวตั้ง / มือถือพับได้ (Tablet Portrait / Phone Landscape) — แนะนำใช้ Grid 3 Columns, ใช้ Navigation Rail
+- **Expanded (≥ 840 dp):** แท็บเล็ตแนวนอน / หน้าจอคอมพิวเตอร์ (Tablet Landscape / Desktop) — แนะนำใช้ Grid 4 Columns ขึ้นไป, ใช้ Navigation Drawer
+
 ---
 
-### ส่วนที่ 2 — Go Router
+### ส่วนที่ 2 — Go Router & Deep Linking
 
-**Go Router** คือ Package Navigation ที่ Google แนะนำสำหรับ Flutter ซึ่งใช้ **URL-based Navigation** เหมาะกับทั้ง Mobile และ Web
+**Go Router** คือ Package Navigation ที่ Google แนะนำสำหรับ Flutter ซึ่งใช้ **Declarative / URL-based Navigation (Navigator 2.0)** เหมาะกับทั้ง Mobile และ Web
 
 **แนวคิดหลัก:**
 
 ```
 GoRouter (Router Configuration)
-├── GoRoute path: '/'            → HomeScreen
-├── GoRoute path: '/destinations' → DestinationListScreen
-│   └── GoRoute path: ':id'     → DestinationDetailScreen (รับ param :id)
-└── GoRoute path: '/profile'    → ProfileScreen
+└── StatefulShellRoute (Bottom Navigation Wrapper)
+    ├── Branch 0: GoRoute path: '/'                  → HomeScreen
+    ├── Branch 1: GoRoute path: '/explore'           → ExploreScreen
+    │   └── GoRoute path: 'destinations/:id'        → DestinationDetailScreen (รับ param :id)
+    ├── Branch 2: GoRoute path: '/saved'             → SavedScreen
+    └── Branch 3: GoRoute path: '/profile'           → ProfileScreen
 ```
 
-**การทำงาน:**
-
-```
-context.go('/destinations')         → Navigate แบบ Replace (ไม่มี Back)
-context.push('/destinations/123')   → Push ขึ้น Stack (มี Back)
-context.pop()                       → กลับหน้าก่อน
-context.pop(result)                 → กลับพร้อมส่งค่า
-```
-
-**Extra Parameters:** ส่ง Object ที่ไม่ใช่ String ได้ผ่าน `extra`
+**คำสั่งการนำทางที่สำคัญ:**
 
 ```dart
-context.push('/detail', extra: myObject);
-// รับที่ปลายทาง:
-final obj = state.extra as MyType;
+context.go('/explore')                                // เปลี่ยนไปหน้า /explore ตามโครงสร้าง Route Tree
+context.push('/explore/destinations/1')               // Push หน้าใหม่ซ้อนทับขึ้นไปบน Stack (มีปุ่มย้อนกลับ)
+context.pushNamed('destination-detail', pathParameters: {'id': '1'}) // เรียกผ่าน Named Route (ลดความเสี่ยงพิมพ์ Path ผิด)
+context.pop()                                         // ย้อนกลับหน้าก่อนหน้า
 ```
+
+**ความแตกต่างระหว่าง `ShellRoute` และ `StatefulShellRoute`:**
+
+- **`ShellRoute`:** เมื่อผู้ใช้สลับ Tab ตัวหน้าเก่าจะถูกทำลาย (Destroy) ทำให้ State และตำแหน่ง Scroll หายไป
+- **`StatefulShellRoute.indexedStack`:** รักษาสภาพหน้าและ State ของแต่ละ Tab ไว้ (Keep-Alive) เมื่อสลับ Tab กลับมา หน้าเดิมจะยังอยู่ตำแหน่งเดิม
+
+> **⚠️ ข้อระวังการใช้ `extra` และ Deep Link:**
+> การส่ง Object ผ่าน `extra` (เช่น `context.pushNamed('detail', extra: myObject)`) ช่วยให้ส่งข้อมูลข้ามหน้าได้สะดวก แต่หากผู้ใช้กด Refresh หน้าเว็บ หรือเปิดผ่าน Deep Link URL ตรง ๆ ค่า `extra` จะกลายเป็น `null` ดังนั้นในการทำงานจริง ต้องดึง `pathParameters['id']` มาใช้ค้นหาข้อมูลสำรอง (Fallback) เสมอ
 
 ---
 
@@ -116,13 +126,13 @@ travel_app/
 ├── lib/
 │   ├── main.dart                    ← Entry Point + Router Config
 │   ├── router/
-│   │   └── app_router.dart          ← GoRouter Setup
+│   │   └── app_router.dart          ← GoRouter Setup (StatefulShellRoute + Named Routes)
 │   ├── models/
-│   │   └── destination.dart         ← Data Model
+│   │   └── destination.dart         ← Data Model & Sample Data
 │   ├── screens/
-│   │   ├── home_screen.dart         ← หน้าหลัก + Bottom Navigation
-│   │   ├── explore_screen.dart      ← รายการ Destination (Grid)
-│   │   ├── destination_detail_screen.dart ← รายละเอียด
+│   │   ├── home_screen.dart         ← หน้าหลัก + Featured Items
+│   │   ├── explore_screen.dart      ← รายการ Destination (Responsive Grid)
+│   │   ├── destination_detail_screen.dart ← รายละเอียดสถานที่
 │   │   ├── saved_screen.dart        ← รายการที่บันทึก
 │   │   └── profile_screen.dart      ← Profile
 │   └── widgets/
@@ -259,7 +269,7 @@ final List<Destination> sampleDestinations = [
     id: '5',
     name: 'บาหลี',
     country: 'อินโดนีเซีย',
-    description: 'เกาะแห่งพระเจ้า เต็มไปด้วยวัด棚田 และชายหาดสวยงาม',
+    description: 'เกาะแห่งพระเจ้า เต็มไปด้วยวัดและชายหาดสวยงาม',
     imageUrl: 'https://picsum.photos/seed/bali/400/300',
     rating: 4.7,
     price: 60,
@@ -352,7 +362,7 @@ class DestinationCard extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.black54,
+                        color: Colors.black.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -380,7 +390,7 @@ class DestinationCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ชื่อและประเทศ
+                    // ชื่อและราคา
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -435,7 +445,8 @@ class DestinationCard extends StatelessWidget {
                                   MaterialTapTargetSize.shrinkWrap,
                               visualDensity: VisualDensity.compact,
                               backgroundColor: Colors.blue.shade50,
-                              side: BorderSide.none,
+                              shape: const StadiumBorder(
+                                  side: BorderSide(color: Colors.transparent)),
                               padding: EdgeInsets.zero,
                             ),
                           )
@@ -467,7 +478,7 @@ class DestinationCard extends StatelessWidget {
 
 **เวลาโดยประมาณ:** 40 นาที
 
-#### ขั้นตอนที่ 4.1 — Explore Screen (Grid Layout)
+#### ขั้นตอนที่ 4.1 — Explore Screen (Responsive Grid Layout)
 
 สร้างไฟล์ `lib/screens/explore_screen.dart`:
 
@@ -540,17 +551,16 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildGrid() {
-    // ── LayoutBuilder: ปรับ Column Count ตามความกว้างหน้าจอ ────────
+    // ── LayoutBuilder: ปรับ Column Count ตามมาตรฐาน M3 Window Size Classes ──
     return LayoutBuilder(
       builder: (context, constraints) {
-        // กำหนด Column Count ตาม Breakpoint
         int crossAxisCount;
         if (constraints.maxWidth < 600) {
-          crossAxisCount = 2; // Phone
-        } else if (constraints.maxWidth < 900) {
-          crossAxisCount = 3; // Tablet Portrait
+          crossAxisCount = 2; // Compact: Phone
+        } else if (constraints.maxWidth < 840) {
+          crossAxisCount = 3; // Medium: Tablet Portrait
         } else {
-          crossAxisCount = 4; // Tablet Landscape / Desktop
+          crossAxisCount = 4; // Expanded: Tablet Landscape / Desktop
         }
 
         return GridView.builder(
@@ -567,9 +577,12 @@ class _ExploreScreenState extends State<ExploreScreen> {
             return DestinationCard(
               destination: destination,
               onTap: () {
-                // Navigate ไปหน้า Detail พร้อมส่ง Object ผ่าน extra
-                context.push('/destinations/${destination.id}',
-                    extra: destination);
+                // เรียกใช้ Named Route แบบมี Type-safe parameters
+                context.pushNamed(
+                  'destination-detail',
+                  pathParameters: {'id': destination.id},
+                  extra: destination,
+                );
               },
             );
           },
@@ -633,8 +646,8 @@ class DestinationDetailScreen extends StatelessWidget {
           onTap: () => context.pop(),
           child: Container(
             margin: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.black45,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.45),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.arrow_back, color: Colors.white),
@@ -643,8 +656,8 @@ class DestinationDetailScreen extends StatelessWidget {
         actions: [
           Container(
             margin: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Colors.black45,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.45),
               shape: BoxShape.circle,
             ),
             child: IconButton(
@@ -884,7 +897,7 @@ class _InfoChip extends StatelessWidget {
 }
 ```
 
-#### ขั้นตอนที่ 4.3 — Home, Saved, Profile Screens (Simple)
+#### ขั้นตอนที่ 4.3 — Home, Saved, Profile Screens
 
 สร้างไฟล์ `lib/screens/home_screen.dart`:
 
@@ -899,7 +912,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // แสดงแค่ 3 Destinations แรกเป็น Featured
     final featured = sampleDestinations.take(3).toList();
 
     return Scaffold(
@@ -964,8 +976,9 @@ class HomeScreen extends StatelessWidget {
                       width: 220,
                       child: DestinationCard(
                         destination: dest,
-                        onTap: () => context.push(
-                          '/destinations/${dest.id}',
+                        onTap: () => context.pushNamed(
+                          'destination-detail',
+                          pathParameters: {'id': dest.id},
                           extra: dest,
                         ),
                       ),
@@ -1032,7 +1045,7 @@ class _StatCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -1165,30 +1178,24 @@ import '../screens/destination_detail_screen.dart';
 import '../screens/saved_screen.dart';
 import '../screens/profile_screen.dart';
 
-// ── Shell Route: Bottom Navigation Bar ─────────────────────────────
-// ShellRoute ทำให้ Bottom Navigation Bar อยู่คงที่ตลอดเวลา
-// ขณะที่ Content ด้านในเปลี่ยน
+// ── Scaffold Shell Wrapper ─────────────────────────────────────────
 class ScaffoldWithNavBar extends StatelessWidget {
-  final Widget child; // Content ปัจจุบัน (injected โดย ShellRoute)
   final StatefulNavigationShell navigationShell;
 
   const ScaffoldWithNavBar({
     super.key,
-    required this.child,
     required this.navigationShell,
   });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: child,
+      body: navigationShell, // แสดง Content ของ active branch
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
-          // goBranch: เปลี่ยน Branch โดยไม่ reset Stack
           navigationShell.goBranch(
             index,
-            // initialLocation: กลับไป root ของ Branch นั้นเมื่อกด Tab ซ้ำ
             initialLocation: index == navigationShell.currentIndex,
           );
         },
@@ -1222,15 +1229,12 @@ class ScaffoldWithNavBar extends StatelessWidget {
 // ── Router Definition ──────────────────────────────────────────────
 final GoRouter appRouter = GoRouter(
   initialLocation: '/',
-  debugLogDiagnostics: true, // Log navigation events (ปิดใน Production)
+  debugLogDiagnostics: true,
   routes: [
-    // StatefulShellRoute: รักษา State ของแต่ละ Tab ไว้
+    // StatefulShellRoute.indexedStack ช่วยรักษาสภาพ State ของแต่ละ Tab
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
-        return ScaffoldWithNavBar(
-          navigationShell: navigationShell,
-          child: navigationShell,
-        );
+        return ScaffoldWithNavBar(navigationShell: navigationShell);
       },
       branches: [
         // ── Branch 0: Home ──────────────────────────────────────
@@ -1250,26 +1254,22 @@ final GoRouter appRouter = GoRouter(
               path: '/explore',
               name: 'explore',
               builder: (context, state) => const ExploreScreen(),
-              // routes ย่อย: Detail อยู่ใต้ Explore
               routes: [
                 GoRoute(
-                  path: '/destinations/:id',
+                  path: 'destinations/:id', // Sub-route path ไม่ต้องมี / นำหน้า
                   name: 'destination-detail',
                   builder: (context, state) {
-                    // รับ Destination Object จาก extra
-                    final destination = state.extra as Destination;
+                    final id = state.pathParameters['id'];
+                    // Fallback ดึงข้อมูลจาก ID กรณี extra เป็น null (เช่น กด Refresh บน Web)
+                    final destination = state.extra as Destination? ??
+                        sampleDestinations.firstWhere(
+                          (d) => d.id == id,
+                          orElse: () => sampleDestinations.first,
+                        );
                     return DestinationDetailScreen(destination: destination);
                   },
                 ),
               ],
-            ),
-            // Shortcut Route: Navigate ตรงไป Detail จาก Home ได้
-            GoRoute(
-              path: '/destinations/:id',
-              builder: (context, state) {
-                final destination = state.extra as Destination;
-                return DestinationDetailScreen(destination: destination);
-              },
             ),
           ],
         ),
@@ -1296,7 +1296,6 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
   ],
-  // Error Page: แสดงเมื่อ Route ไม่พบ
   errorBuilder: (context, state) => Scaffold(
     body: Center(
       child: Text('ไม่พบหน้าที่ต้องการ: ${state.error}'),
@@ -1376,11 +1375,11 @@ flutter run
 | 3 | พิมพ์ค้นหา "โตเกียว" | ผลการค้นหาเหลือเฉพาะโตเกียว | |
 | 4 | กดที่ Card ใด ๆ | เปิด Detail Screen พร้อมข้อมูลถูกต้อง | |
 | 5 | กด Back บน Detail | กลับมา Explore Screen | |
-| 6 | กด Tab "หน้าหลัก" | กลับหน้าหลัก Stack ยังคงอยู่ใน Explore | |
+| 6 | กด Tab "หน้าหลัก" | กลับหน้าหลัก โดยที่ Stack ใน Explore ยังไม่หาย | |
 | 7 | กดหัวใจบน Detail | Snackbar แจ้งบันทึกสำเร็จ | |
 | 8 | กด "จองเลย" บน Detail | Dialog แสดงการจองสำเร็จ | |
 | 9 | กด "กลับหน้าหลัก" ใน Dialog | Navigate กลับ Home | |
-| 10 | หมุนหน้าจอ Landscape | Grid ปรับ Column Count | |
+| 10 | หมุนหน้าจอ Landscape | Grid ปรับ Column Count ตาม M3 Breakpoint | |
 
 ---
 
@@ -1424,9 +1423,13 @@ SizedBox(
 
 ```dart
 GoRoute(
-  path: '/destinations/:id',
+  path: 'destinations/:id',
+  name: 'destination-detail',
   pageBuilder: (context, state) {
-    final destination = state.extra as Destination;
+    final id = state.pathParameters['id'];
+    final destination = state.extra as Destination? ??
+        sampleDestinations.firstWhere((d) => d.id == id);
+
     return CustomTransitionPage(
       child: DestinationDetailScreen(destination: destination),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -1454,11 +1457,11 @@ GoRoute(
 
 1. `LayoutBuilder` ต่างกับ `MediaQuery` อย่างไร? เลือกใช้อันไหนในสถานการณ์ใด?
 
-2. ทำไม Go Router ถึงใช้ `StatefulShellRoute` แทน `ShellRoute` ธรรมดา? ผลต่างคืออะไร?
+2. ทำไม Go Router ถึงใช้ `StatefulShellRoute` แทน `ShellRoute` ธรรมดา? ผลต่างเรื่อง State Management คืออะไร?
 
 3. ในโค้ด `DestinationCard` เราใช้ `Expanded` ครอบ `Text` ชื่อ Destination ทำไม? จะเกิดอะไรขึ้นถ้าลบออก?
 
-4. การส่งข้อมูลผ่าน `extra` ของ Go Router มีข้อจำกัดอะไรบ้าง? เปรียบเทียบกับการส่งผ่าน `pathParameters`
+4. การส่งข้อมูลผ่าน `extra` ของ Go Router มีข้อจำกัดอะไรกรณี Deep Link / Web Refresh? และแก้ปัญหานี้ได้อย่างไร?
 
 5. วาด Navigation Hierarchy ของแอปนี้ (สามารถวาดบนกระดาษแล้วถ่ายรูป)
 
