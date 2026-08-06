@@ -3,7 +3,7 @@
 
 > **รายวิชา:** การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่  
 > **สัปดาห์ที่:** 4 | **เวลา:** 3.5 ชั่วโมง  
-> **เครื่องมือ:** Flutter SDK, Dart, VS Code / Android Studio, Go Router  
+> **เครื่องมือ:** Flutter SDK, Dart, VS Code, Go Router (ไม่ต้องใช้ Android Studio — ใช้ VS Code + Android SDK Command-line Tools ตามที่ตั้งค่าไว้ในสัปดาห์ที่ 1)  
 
 ---
 
@@ -1358,11 +1358,25 @@ flutter analyze
 # ควรไม่มี Error หลัก
 ```
 
-#### ขั้นตอนที่ 6.2 — รันบน Emulator หรือ Device
+#### ขั้นตอนที่ 6.2 — รันบน Device ที่เลือกไว้
+
+เลือก Target Device ตามวิธีที่ตั้งค่าไว้ในสัปดาห์ที่ 1 (ไม่ต้องใช้ Android Studio):
 
 ```bash
+# ตัวเลือกที่ 1: รันบน Chrome (เร็วที่สุด ไม่ต้องมี Emulator/Device)
+flutter run -d chrome
+
+# ตัวเลือกที่ 2: รันบน Android Emulator ที่สร้างด้วย avdmanager (ต้องเปิด Emulator ไว้ก่อน)
 flutter run
+
+# ตัวเลือกที่ 3: รันบนเครื่อง Android จริงที่เชื่อมต่อผ่าน adb
+flutter run
+
+# ตรวจสอบ Device ที่ตรวจพบทั้งหมดก่อนเลือก
+flutter devices
 ```
+
+> 💡 หรือกด `F5` ใน VS Code แล้วเลือก Device จาก Status Bar ด้านล่างขวาแทนก็ได้ เช่นเดียวกับที่ทำในสัปดาห์ที่ 1
 
 #### ขั้นตอนที่ 6.3 — ทดสอบฟีเจอร์ต่าง ๆ
 
@@ -1379,9 +1393,14 @@ flutter run
 | 7 | กดหัวใจบน Detail | Snackbar แจ้งบันทึกสำเร็จ | |
 | 8 | กด "จองเลย" บน Detail | Dialog แสดงการจองสำเร็จ | |
 | 9 | กด "กลับหน้าหลัก" ใน Dialog | Navigate กลับ Home | |
-| 10 | หมุนหน้าจอ Landscape | Grid ปรับ Column Count ตาม M3 Breakpoint | |
+| 10 | ปรับความกว้างหน้าจอ (ดูวิธีตาม Device ด้านล่าง) | Grid ปรับ Column Count ตาม M3 Breakpoint | |
 
 ---
+
+> 📝 **วิธีทดสอบข้อ 10 ตาม Device ที่ใช้ (ไม่มี Android Studio):**
+> - **Chrome:** ปรับขนาดหน้าต่าง Browser ให้แคบ/กว้างขึ้น หรือเปิด DevTools (`F12`) แล้วใช้ Device Toolbar (`Ctrl+Shift+M`) จำลองขนาดจอต่าง ๆ
+> - **Android Emulator (จาก `avdmanager`):** กด `Ctrl+ลูกศรซ้าย` หรือ `Ctrl+ลูกศรขวา` เพื่อหมุนจอ
+> - **เครื่อง Android จริง:** หมุนตัวเครื่องโดยตรง (ต้องเปิด Auto-rotate ไว้)
 
 ### การทดลองที่ 7 — ทดลองเพิ่มเติม (ถ้ามีเวลา)
 
