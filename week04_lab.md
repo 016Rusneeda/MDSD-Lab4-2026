@@ -17,6 +17,16 @@
 4. ส่งผ่านข้อมูล (Arguments / Path Parameters) ระหว่าง Screen และจัดการ Fallback กรณี Deep Link / Web Refresh ได้อย่างถูกต้อง
 5. ออกแบบ Navigation Hierarchy ที่เหมาะสมสำหรับ Mobile และ Web Application
 
+### 🎯 การเชื่อมโยงวัตถุประสงค์กับการประเมินผล
+
+| วัตถุประสงค์ | วัดผลจาก |
+|---|---|
+| 1. Layout Widgets | Checkpoint 3 (DestinationCard), Checkpoint 4.3 (ListView), ตารางทดสอบ #2, #10, #12 |
+| 2. Responsive + LayoutBuilder/MediaQuery | Checkpoint 4.1, ตารางทดสอบ #10, #15, คำถามข้อ 1 |
+| 3. Go Router Multi-screen | Checkpoint 5.1, ตารางทดสอบ #1, #2, #5, #6, #8, #9, #14, คำถามข้อ 2 |
+| 4. ส่งข้อมูล + Fallback | Checkpoint 5.1, ตารางทดสอบ #4, #11, #13, คำถามข้อ 4 |
+| 5. Navigation Hierarchy | คำถามข้อ 5, การทดลองที่ 8 (โจทย์ท้าทาย) |
+
 ---
 
 ## 🧪 ทฤษฎีก่อนการทดลอง
@@ -199,6 +209,8 @@ mkdir -p lib/router lib/models lib/screens lib/widgets
 สร้างไฟล์ `lib/models/destination.dart`:
 
 ```dart
+// ทุก Field เป็น final เพราะ Destination ควรเป็น Immutable Object
+// (สร้างแล้วไม่แก้ไขค่าเดิม ถ้าต้องการเปลี่ยนค่าให้สร้าง Object ใหม่แทน)
 class Destination {
   final String id;
   final String name;
@@ -472,6 +484,12 @@ class DestinationCard extends StatelessWidget {
 > - `Expanded` → ทำให้ชื่อยืดและตัด ... เมื่อยาวเกิน
 > - `Wrap` → จัด Tags โดย Wrap ขึ้นบรรทัดใหม่เองเมื่อไม่พอ
 
+> **🎯 Checkpoint 3 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 1):**
+> แก้ไข `DestinationCard` ด้วยตัวเอง โดยไม่ดูเฉลยจากที่ไหน:
+> 1. ย้าย Rating Badge จากมุมขวาบน (`top: 8, right: 8`) ไปเป็นมุม**ซ้ายล่าง**ของรูปแทน
+> 2. เพิ่ม `Row` ใหม่ใต้ Tags แสดงไอคอน `Icons.bed` พร้อมข้อความ "พร้อมเข้าพัก" โดยครอบข้อความด้วย `Expanded` เพื่อกันไม่ให้ล้นถ้าชื่อยาว
+> 3. เขียน Comment สั้น ๆ ในโค้ดของตัวเองอธิบายว่าทำไมต้องใช้ `Positioned` คู่กับ `Stack` ถึงจะย้ายตำแหน่ง Badge ได้ (ถ้าใช้ `Positioned` นอก `Stack` จะเกิดอะไรขึ้น)
+
 ---
 
 ### การทดลองที่ 4 — สร้าง Screens
@@ -496,8 +514,10 @@ class ExploreScreen extends StatefulWidget {
 }
 
 class _ExploreScreenState extends State<ExploreScreen> {
-  String _searchQuery = '';
+  String _searchQuery = ''; // เก็บคำค้นหาปัจจุบัน อัปเดตทุกครั้งที่พิมพ์ใน TextField
 
+  // Getter (ไม่ใช่ Method ธรรมดา เรียกโดยไม่ต้องมี ()) คำนวณรายการที่ตรงกับคำค้นหาใหม่ทุกครั้งที่ถูกเรียก
+  // เพื่อให้ build() อ่านค่าที่กรองแล้วได้ตรง ๆ โดยไม่ต้องเก็บ State ซ้ำซ้อน
   List<Destination> get _filteredDestinations {
     if (_searchQuery.isEmpty) return sampleDestinations;
     return sampleDestinations
@@ -525,6 +545,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: TextField(
+              // ทุกครั้งที่พิมพ์ จะเรียก setState เพื่อบันทึกคำค้นหาใหม่
+              // แล้วสั่งให้ build() ทำงานใหม่ ซึ่งจะไปเรียก _filteredDestinations ที่กรองด้วยค่าล่าสุด
               onChanged: (value) => setState(() => _searchQuery = value),
               decoration: InputDecoration(
                 hintText: 'ค้นหา Destination...',
@@ -616,6 +638,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 }
 ```
+
+> **🎯 Checkpoint 4.1 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 2):**
+> 1. เพิ่ม Breakpoint ระดับที่ 4 คือ **Large (≥ 1200 dp)** ให้ `crossAxisCount = 5`
+> 2. ใน `_buildGrid()` เพิ่มบรรทัด `final screenWidth = MediaQuery.of(context).size.width;` แล้วลองแสดงค่านี้เทียบกับ `constraints.maxWidth` ของ `LayoutBuilder` (เช่น พิมพ์ด้วย `print()` หรือแสดงเป็น `Text` ชั่วคราวบนหน้าจอ)
+> 3. สังเกตว่าค่าทั้งสองตัวเท่ากันหรือไม่ แล้วเขียนสรุป 2-3 บรรทัดเป็น Comment ในโค้ดว่า `MediaQuery.of(context).size.width` (ความกว้างของทั้งหน้าจอ) กับ `LayoutBuilder` `constraints.maxWidth` (ความกว้างที่ Widget นั้น ๆ ได้รับจาก Parent) ต่างกันอย่างไร และควรเลือกใช้ตัวไหนเมื่อไหร่
 
 #### ขั้นตอนที่ 4.2 — Destination Detail Screen
 
@@ -817,6 +844,8 @@ class DestinationDetailScreen extends StatelessWidget {
                     height: 52,
                     child: ElevatedButton.icon(
                       onPressed: () {
+                        // showDialog เปิด Popup แบบ Modal (บล็อกหน้าจอด้านหลังจนกว่าจะปิด)
+                        // ใช้ context ปัจจุบันเป็นตัวอ้างอิงตำแหน่งของ Navigator
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
@@ -826,6 +855,8 @@ class DestinationDetailScreen extends StatelessWidget {
                             actions: [
                               TextButton(
                                 onPressed: () {
+                                  // Navigator.pop(context) ปิด Dialog ก่อน (Dialog เป็น Route ซ้อนอยู่บนสุด)
+                                  // แล้วค่อย context.go('/') เพื่อกลับไปหน้า Home ผ่าน Go Router
                                   Navigator.pop(context);
                                   context.go('/');
                                 },
@@ -854,7 +885,8 @@ class DestinationDetailScreen extends StatelessWidget {
   }
 }
 
-// Reusable Info Chip Widget
+// Reusable Info Chip Widget — ขึ้นต้นด้วย _ (underscore) แปลว่าเป็น Private Class
+// ใช้ได้แค่ภายในไฟล์นี้เท่านั้น เหมาะกับ Widget เล็ก ๆ ที่ใช้ซ้ำแค่ในหน้านี้
 class _InfoChip extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
@@ -1028,6 +1060,8 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
+// การ์ดแสดงสถิติตัวเลขเดียว (Trip / Country / Saved) — แยกเป็น Widget ของตัวเอง
+// เพื่อลดการเขียนโค้ดซ้ำ 3 รอบใน Row ด้านบน (DRY: Don't Repeat Yourself)
 class _StatCard extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -1062,6 +1096,11 @@ class _StatCard extends StatelessWidget {
   }
 }
 ```
+
+> **🎯 Checkpoint 4.3 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 1):**
+> 1. เปลี่ยน Featured Section จากที่โชว์แค่ 3 รายการแรก (`sampleDestinations.take(3)`) ให้แสดง `sampleDestinations` **ทั้งหมด** ใน `ListView.separated` แนวนอนเดิม
+> 2. เพิ่ม Section ใหม่ด้านล่าง Quick Stats ชื่อ "รีวิวยอดนิยม" ที่ใช้ `Column` ครอบ `ListView` แนวตั้งแบบ `shrinkWrap: true` และ `physics: NeverScrollableScrollPhysics()` แสดงชื่อ Destination 3 อันดับที่ `rating` สูงสุด (ต้องเขียน Logic Sort เอง)
+> 3. เขียน Comment อธิบายว่าทำไมต้องใส่ `shrinkWrap: true` และ `NeverScrollableScrollPhysics()` เมื่อวาง `ListView` ซ้อนอยู่ใน `Column` ที่อยู่ใน `SingleChildScrollView` อีกที (จะเกิดอะไรขึ้นถ้าไม่ใส่)
 
 สร้างไฟล์ `lib/screens/saved_screen.dart`:
 
@@ -1194,6 +1233,8 @@ class ScaffoldWithNavBar extends StatelessWidget {
       bottomNavigationBar: NavigationBar(
         selectedIndex: navigationShell.currentIndex,
         onDestinationSelected: (index) {
+          // goBranch เปลี่ยนไป Branch (Tab) ที่เลือก โดยที่ Stack ของ Branch อื่น ๆ ยังอยู่ครบ (ไม่ถูก Reset)
+          // initialLocation: true จะรีเซ็ต Branch นั้นกลับไปหน้าแรกสุด — ใช้ตอนกด Tab เดิมซ้ำ (เหมือนแอปทั่วไปที่กด Tab ซ้ำแล้วเด้งกลับหน้าแรก)
           navigationShell.goBranch(
             index,
             initialLocation: index == navigationShell.currentIndex,
@@ -1296,6 +1337,8 @@ final GoRouter appRouter = GoRouter(
       ],
     ),
   ],
+  // errorBuilder ทำงานเมื่อ URL ที่ไปไม่ตรงกับ Route ใดเลยในระบบ (เช่นพิมพ์ Path ผิด)
+  // ควรใช้แสดงหน้า "ไม่พบหน้า" แทนที่จะปล่อยให้แอป Crash
   errorBuilder: (context, state) => Scaffold(
     body: Center(
       child: Text('ไม่พบหน้าที่ต้องการ: ${state.error}'),
@@ -1303,6 +1346,11 @@ final GoRouter appRouter = GoRouter(
   ),
 );
 ```
+
+> **🎯 Checkpoint 5.1 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 3 และ 4):**
+> 1. เพิ่ม Branch ที่ 4 ใหม่ในเมนู Bottom Navigation ชื่อ "เกี่ยวกับ" (path `/about`) ที่ชี้ไปหน้า `AboutScreen` ที่สร้างเอง (เป็น `StatelessWidget` ง่าย ๆ มี `Scaffold` + `Text` พอ) — ต้องเพิ่มทั้ง `NavigationDestination` ใน `ScaffoldWithNavBar` และ `StatefulShellBranch` ใหม่ใน `appRouter`
+> 2. แก้ไข Fallback Logic ใน Route `destination-detail` จากเดิมที่ใช้ `orElse: () => sampleDestinations.first` (ซึ่งถ้าหา `id` ไม่เจอจะเด้งไปโชว์ข้อมูลผิดตัวแบบเงียบ ๆ โดยไม่แจ้งผู้ใช้) ให้เปลี่ยนไปแสดงหน้า "ไม่พบข้อมูลที่ต้องการ" แทน เมื่อหา `id` นั้นไม่เจอจริง ๆ
+> 3. ทดสอบ Fallback ที่แก้ไข โดยรันแอปบน Chrome (`flutter run -d chrome`) แล้วพิมพ์ URL `/explore/destinations/999` ตรง ๆ ใน Address Bar (เป็น `id` ที่ไม่มีอยู่จริง) — ต้องเห็นหน้า "ไม่พบข้อมูลที่ต้องการ" ไม่ใช่ Error สีแดงหรือข้อมูลผิดตัว
 
 #### ขั้นตอนที่ 5.2 — ตั้งค่า main.dart
 
@@ -1394,6 +1442,11 @@ flutter devices
 | 8 | กด "จองเลย" บน Detail | Dialog แสดงการจองสำเร็จ | |
 | 9 | กด "กลับหน้าหลัก" ใน Dialog | Navigate กลับ Home | |
 | 10 | ปรับความกว้างหน้าจอ (ดูวิธีตาม Device ด้านล่าง) | Grid ปรับ Column Count ตาม M3 Breakpoint | |
+| 11 | Refresh หน้า Detail บน Chrome (กด `F5` ขณะอยู่ที่หน้ารายละเอียด) | ข้อมูล Destination ยังแสดงถูกต้อง ไม่ใช่ null/Error (Fallback ทำงาน) | |
+| 12 | เลื่อนดู Featured List แนวนอนบนหน้า Home (หลังทำ Checkpoint 4.3) | เห็นครบทุก Destination เลื่อนซ้าย-ขวาได้ลื่นไหล | |
+| 13 | พิมพ์ URL `/explore/destinations/999` ตรง ๆ (หลังทำ Checkpoint 5.1) | แสดงหน้า "ไม่พบข้อมูลที่ต้องการ" ไม่ใช่ Error สีแดง | |
+| 14 | กด Tab "เกี่ยวกับ" ที่เพิ่มใหม่ (หลังทำ Checkpoint 5.1) | เปลี่ยนไปหน้า AboutScreen ได้ | |
+| 15 | เทียบค่า `MediaQuery.size.width` กับ `constraints.maxWidth` (ตาม Checkpoint 4.1) | บันทึกค่าที่สังเกตได้และสรุปความแตกต่าง | |
 
 ---
 
@@ -1470,6 +1523,38 @@ GoRoute(
 
 ---
 
+### การทดลองที่ 8 — โจทย์ท้าทาย: ทำ Saved Screen ให้ใช้งานได้จริง (Independent Challenge)
+
+**เวลาโดยประมาณ:** 40-60 นาที
+
+> ⚠️ **ส่วนนี้ไม่มีโค้ดตัวอย่างให้คัดลอก** ให้นักศึกษาออกแบบและเขียนเอง โดยใช้ความรู้เรื่อง Layout Widgets, Responsive Design และ Go Router ที่ฝึกมาตลอดใบงานนี้
+
+**โจทย์:** ปัจจุบันหน้า "บันทึกไว้" (`SavedScreen`) เป็นแค่ Static UI ที่ไม่มีข้อมูลจริง ให้ทำให้ฟีเจอร์นี้ **ใช้งานได้จริง** ตามข้อกำหนดต่อไปนี้:
+
+1. **เพิ่มปุ่มบันทึก (Objective 1 & 3):** เพิ่ม Icon รูปหัวใจบน `DestinationCard` หรือ `DestinationDetailScreen` (เลือกจุดใดจุดหนึ่งหรือทั้งสองจุด) ให้กดแล้วสลับสถานะ "บันทึกแล้ว / ยังไม่บันทึก" ได้ โดยไอคอนต้องเปลี่ยนรูปตามสถานะ (เช่น `Icons.favorite` ↔ `Icons.favorite_border`)
+
+2. **จัดการ State ที่ใช้ร่วมกันข้ามหน้า:** ข้อมูลว่า Destination ไหนถูกบันทึกไว้บ้าง ต้องเข้าถึงได้จากทั้ง Explore Screen, Detail Screen และ Saved Screen พร้อมกัน (คำใบ้: ลองสร้าง Class ง่าย ๆ เก็บ `Set<String> savedIds` ไว้เป็นตัวแปร Global หรือส่งผ่าน Constructor — ยังไม่ต้องใช้ State Management Library ใด ๆ ในระดับนี้)
+
+3. **แสดงผลใน Saved Screen (Objective 1 & 2):** ให้ `SavedScreen` แสดงรายการ Destination ที่ถูกบันทึกไว้จริง โดยใช้ `GridView` หรือ `ListView` (เลือกอย่างใดอย่างหนึ่ง) และต้องปรับจำนวนคอลัมน์/Layout ตามขนาดหน้าจอด้วย `LayoutBuilder` เหมือนที่ทำใน Explore Screen — ถ้ายังไม่มีรายการที่บันทึกไว้ ให้แสดง Empty State เหมือนเดิม
+
+4. **Navigation (Objective 3 & 4):** กดที่ Card ใน Saved Screen แล้วต้องไปหน้า Detail ได้ถูกต้อง โดยใช้ `context.pushNamed('destination-detail', ...)` แบบเดียวกับหน้าอื่น ๆ
+
+5. **เขียน Comment อธิบายโค้ดของตัวเอง** อย่างน้อย 3 จุดที่คิดว่าซับซ้อนที่สุด เพื่อให้เพื่อนหรืออาจารย์อ่านเข้าใจการทำงานได้
+
+**เกณฑ์ตรวจ (สำหรับการทดลองที่ 8):**
+
+| เกณฑ์ | คะแนน |
+|---|---|
+| กดบันทึก/ยกเลิกบันทึกได้ ไอคอนเปลี่ยนถูกต้อง | 25% |
+| Saved Screen แสดงรายการที่บันทึกจริง + มี Empty State | 25% |
+| Layout ปรับตามขนาดหน้าจอด้วย LayoutBuilder | 20% |
+| กดจาก Saved Screen ไป Detail ได้ถูกต้อง | 20% |
+| มี Comment อธิบายจุดสำคัญอย่างน้อย 3 จุด | 10% |
+
+> 💡 **หลีกเลี่ยงการขอโค้ดทั้งไฟล์จาก AI** ให้ลองเขียนเองก่อน ถ้าติดจริง ๆ ให้ถามเป็นจุด ๆ ไป (เช่น "ทำไม setState ใน Widget อื่นไม่ทำให้ Saved Screen รีเฟรช") จะได้เรียนรู้มากกว่าการคัดลอกทั้งดุ้น
+
+---
+
 ## 📝 คำถามท้ายใบงาน
 
 **ให้ตอบคำถามต่อไปนี้ในรายงาน:**
@@ -1488,9 +1573,9 @@ GoRoute(
 
 ## 📤 การส่งงาน
 
-1. Push โค้ดขึ้น GitHub Repository ส่วนตัว (Branch: `week04-layout-navigation`)
-2. สร้าง Pull Request พร้อมเขียน Description ว่าทำอะไรไปบ้าง
-3. แนบ Screenshot หรือ Screen Recording แสดง Navigation ที่ทำงานได้
+1. Push โค้ดขึ้น GitHub Repository ส่วนตัว (Branch: `week04-layout-navigation`) — ต้องรวมโค้ดที่แก้จาก Checkpoint 3, 4.1, 4.3, 5.1 และการทดลองที่ 8 ด้วย
+2. สร้าง Pull Request พร้อมเขียน Description ว่าทำอะไรไปบ้าง (รวมถึงสรุปสั้น ๆ ว่าการทดลองที่ 8 ทำอะไรสำเร็จบ้าง)
+3. แนบ Screenshot หรือ Screen Recording แสดง Navigation ที่ทำงานได้ รวมถึงฟีเจอร์ Saved จากการทดลองที่ 8
 4. ตอบคำถามท้ายใบงานใน Comment ของ Pull Request
 
 **Deadline:** ก่อนชั้นเรียนสัปดาห์ที่ 5
