@@ -1582,8 +1582,7 @@ GoRoute(
 
 1. Push โค้ดขึ้น GitHub Repository ส่วนตัว (Branch: `week04-layout-navigation`) 
 2. สร้าง Pull Request พร้อมเขียน Description ว่าทำอะไรไปบ้าง (รวมถึงสรุปสั้น ๆ ว่าการทดลองที่ 8 ทำอะไรสำเร็จบ้าง)
-3. แนบ Screenshot หรือ Screen Recording แสดง Navigation ที่ทำงานได้ ให้ครบถ้วนตามใบงานการทดลอง
-4. ตอบคำถามท้ายใบงานการทดลองให้ครบถ้วน
+
 
 **กำหนดส่ง:** ก่อนเรียนในสัปดาห์ถัดไป
 
