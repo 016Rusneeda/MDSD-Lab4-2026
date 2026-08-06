@@ -2,18 +2,17 @@
 # Flutter Layout & Navigation — Multi-Screen Travel App
 
 > **รายวิชา:** การพัฒนาซอฟต์แวร์สำหรับอุปกรณ์เคลื่อนที่  
-> **สัปดาห์ที่:** 4 | **เวลา:** 3.5 ชั่วโมง  
-> **เครื่องมือ:** Flutter SDK, Dart, VS Code, Go Router (ไม่ต้องใช้ Android Studio — ใช้ VS Code + Android SDK Command-line Tools ตามที่ตั้งค่าไว้ในสัปดาห์ที่ 1)  
+> **เครื่องมือ:** Flutter SDK, Dart, VS Code, Go Router  
 
 ---
 
 ## 📋 วัตถุประสงค์การเรียนรู้
 
-เมื่อจบใบงานนี้ นักศึกษาจะสามารถ:
+เมื่อจบใบงานการทดลองนี้ นักศึกษาสามารถ:
 
 1. ใช้ Layout Widgets หลัก (`Row`, `Column`, `Stack`, `GridView`, `ListView`) ได้อย่างถูกต้อง
-2. สร้าง Responsive Layout ที่ปรับขนาดตามหน้าจอโดยอ้างอิงมาตรฐาน Material Design 3 (Window Size Classes) ด้วย `LayoutBuilder` และ `MediaQuery`
-3. ตั้งค่า Navigation แบบ Multi-screen ด้วย **Go Router** พร้อม Named Routes และ `StatefulShellRoute`
+2. สร้าง Responsive Layout ที่ปรับขนาดตามหน้าจอโดยอ้างอิงมาตรฐาน Material Design 3 (Window Size Classes) ด้วย `LayoutBuilder` และ `MediaQuery` ได้
+3. ตั้งค่า Navigation แบบ Multi-screen ด้วย **Go Router** พร้อม Named Routes และ `StatefulShellRoute` ได้
 4. ส่งผ่านข้อมูล (Arguments / Path Parameters) ระหว่าง Screen และจัดการ Fallback กรณี Deep Link / Web Refresh ได้อย่างถูกต้อง
 5. ออกแบบ Navigation Hierarchy ที่เหมาะสมสำหรับ Mobile และ Web Application
 
@@ -25,7 +24,7 @@
 | 2. Responsive + LayoutBuilder/MediaQuery | Checkpoint 4.1, ตารางทดสอบ #10, #15, คำถามข้อ 1 |
 | 3. Go Router Multi-screen | Checkpoint 5.1, ตารางทดสอบ #1, #2, #5, #6, #8, #9, #14, คำถามข้อ 2 |
 | 4. ส่งข้อมูล + Fallback | Checkpoint 5.1, ตารางทดสอบ #4, #11, #13, คำถามข้อ 4 |
-| 5. Navigation Hierarchy | คำถามข้อ 5, การทดลองที่ 8 (โจทย์ท้าทาย) |
+| 5. Navigation Hierarchy | คำถามข้อ 5, การทดลองที่ 8 |
 
 ---
 
@@ -158,8 +157,6 @@ travel_app/
 
 ### การทดลองที่ 1 — สร้าง Project และ Setup Dependencies
 
-**เวลาโดยประมาณ:** 15 นาที
-
 #### ขั้นตอนที่ 1.1 — สร้าง Flutter Project ใหม่
 
 ```bash
@@ -201,8 +198,6 @@ mkdir -p lib/router lib/models lib/screens lib/widgets
 ---
 
 ### การทดลองที่ 2 — สร้าง Data Model
-
-**เวลาโดยประมาณ:** 10 นาที
 
 #### ขั้นตอนที่ 2.1 — สร้าง Destination Model
 
@@ -300,13 +295,11 @@ final List<Destination> sampleDestinations = [
 ];
 ```
 
-> **📌 สังเกต:** เราใช้ `const` constructor เพราะ Destination ไม่เปลี่ยนแปลงหลังสร้าง (Immutable)
+> **📌 สังเกต:** ใช้ `const` constructor เพราะ Destination ไม่เปลี่ยนแปลงหลังสร้าง (Immutable)
 
 ---
 
 ### การทดลองที่ 3 — สร้าง Reusable Widget
-
-**เวลาโดยประมาณ:** 20 นาที
 
 #### ขั้นตอนที่ 3.1 — สร้าง DestinationCard Widget
 
@@ -484,17 +477,19 @@ class DestinationCard extends StatelessWidget {
 > - `Expanded` → ทำให้ชื่อยืดและตัด ... เมื่อยาวเกิน
 > - `Wrap` → จัด Tags โดย Wrap ขึ้นบรรทัดใหม่เองเมื่อไม่พอ
 
-> **🎯 Checkpoint 3 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 1):**
-> แก้ไข `DestinationCard` ด้วยตัวเอง โดยไม่ดูเฉลยจากที่ไหน:
+> **🎯 Checkpoint 3 — แก้ไขโค้ดด้วยตนเอง :**
+> แก้ไข `DestinationCard` ด้วยตัวเอง ดังนี้:
 > 1. ย้าย Rating Badge จากมุมขวาบน (`top: 8, right: 8`) ไปเป็นมุม**ซ้ายล่าง**ของรูปแทน
 > 2. เพิ่ม `Row` ใหม่ใต้ Tags แสดงไอคอน `Icons.bed` พร้อมข้อความ "พร้อมเข้าพัก" โดยครอบข้อความด้วย `Expanded` เพื่อกันไม่ให้ล้นถ้าชื่อยาว
 > 3. เขียน Comment สั้น ๆ ในโค้ดของตัวเองอธิบายว่าทำไมต้องใช้ `Positioned` คู่กับ `Stack` ถึงจะย้ายตำแหน่ง Badge ได้ (ถ้าใช้ `Positioned` นอก `Stack` จะเกิดอะไรขึ้น)
 
+บันทึกรูปผลการทดลอง
+```image
+บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ (กรณีที่ยังไม่สามารถรันได้ ให้ทดลองจนถึงขั้นตอนที่สามารถ capture รูปได้และบันทึกรูปไว้ในส่วนนี้)
+```
 ---
 
 ### การทดลองที่ 4 — สร้าง Screens
-
-**เวลาโดยประมาณ:** 40 นาที
 
 #### ขั้นตอนที่ 4.1 — Explore Screen (Responsive Grid Layout)
 
@@ -639,10 +634,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
 }
 ```
 
-> **🎯 Checkpoint 4.1 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 2):**
+> **🎯 Checkpoint 4.1 — แก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 2):**
 > 1. เพิ่ม Breakpoint ระดับที่ 4 คือ **Large (≥ 1200 dp)** ให้ `crossAxisCount = 5`
 > 2. ใน `_buildGrid()` เพิ่มบรรทัด `final screenWidth = MediaQuery.of(context).size.width;` แล้วลองแสดงค่านี้เทียบกับ `constraints.maxWidth` ของ `LayoutBuilder` (เช่น พิมพ์ด้วย `print()` หรือแสดงเป็น `Text` ชั่วคราวบนหน้าจอ)
 > 3. สังเกตว่าค่าทั้งสองตัวเท่ากันหรือไม่ แล้วเขียนสรุป 2-3 บรรทัดเป็น Comment ในโค้ดว่า `MediaQuery.of(context).size.width` (ความกว้างของทั้งหน้าจอ) กับ `LayoutBuilder` `constraints.maxWidth` (ความกว้างที่ Widget นั้น ๆ ได้รับจาก Parent) ต่างกันอย่างไร และควรเลือกใช้ตัวไหนเมื่อไหร่
+
+บันทึกรูปผลการทดลอง
+```image
+บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ (กรณีที่ยังไม่สามารถรันได้ ให้ทดลองจนถึงขั้นตอนที่สามารถ capture รูปได้และบันทึกรูปไว้ในส่วนนี้)
+```
 
 #### ขั้นตอนที่ 4.2 — Destination Detail Screen
 
@@ -1097,10 +1097,15 @@ class _StatCard extends StatelessWidget {
 }
 ```
 
-> **🎯 Checkpoint 4.3 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 1):**
+> **🎯 Checkpoint 4.3 — แก้ไขโค้ด (ประเมินตามวัตถุประสงค์ข้อ 1):**
 > 1. เปลี่ยน Featured Section จากที่โชว์แค่ 3 รายการแรก (`sampleDestinations.take(3)`) ให้แสดง `sampleDestinations` **ทั้งหมด** ใน `ListView.separated` แนวนอนเดิม
 > 2. เพิ่ม Section ใหม่ด้านล่าง Quick Stats ชื่อ "รีวิวยอดนิยม" ที่ใช้ `Column` ครอบ `ListView` แนวตั้งแบบ `shrinkWrap: true` และ `physics: NeverScrollableScrollPhysics()` แสดงชื่อ Destination 3 อันดับที่ `rating` สูงสุด (ต้องเขียน Logic Sort เอง)
 > 3. เขียน Comment อธิบายว่าทำไมต้องใส่ `shrinkWrap: true` และ `NeverScrollableScrollPhysics()` เมื่อวาง `ListView` ซ้อนอยู่ใน `Column` ที่อยู่ใน `SingleChildScrollView` อีกที (จะเกิดอะไรขึ้นถ้าไม่ใส่)
+
+บันทึกรูปผลการทดลอง
+```image
+บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ (กรณีที่ยังไม่สามารถรันได้ ให้ทดลองจนถึงขั้นตอนที่สามารถ capture รูปได้และบันทึกรูปไว้ในส่วนนี้)
+```
 
 สร้างไฟล์ `lib/screens/saved_screen.dart`:
 
@@ -1200,8 +1205,6 @@ class ProfileScreen extends StatelessWidget {
 ---
 
 ### การทดลองที่ 5 — ตั้งค่า Go Router
-
-**เวลาโดยประมาณ:** 25 นาที
 
 #### ขั้นตอนที่ 5.1 — สร้าง Router Configuration
 
@@ -1347,10 +1350,16 @@ final GoRouter appRouter = GoRouter(
 );
 ```
 
-> **🎯 Checkpoint 5.1 — ลงมือแก้โค้ดเอง (ประเมินตามวัตถุประสงค์ข้อ 3 และ 4):**
+> **🎯 Checkpoint 5.1 — แก้ไขโค้ด (ประเมินตามวัตถุประสงค์ข้อ 3 และ 4):**
 > 1. เพิ่ม Branch ที่ 4 ใหม่ในเมนู Bottom Navigation ชื่อ "เกี่ยวกับ" (path `/about`) ที่ชี้ไปหน้า `AboutScreen` ที่สร้างเอง (เป็น `StatelessWidget` ง่าย ๆ มี `Scaffold` + `Text` พอ) — ต้องเพิ่มทั้ง `NavigationDestination` ใน `ScaffoldWithNavBar` และ `StatefulShellBranch` ใหม่ใน `appRouter`
 > 2. แก้ไข Fallback Logic ใน Route `destination-detail` จากเดิมที่ใช้ `orElse: () => sampleDestinations.first` (ซึ่งถ้าหา `id` ไม่เจอจะเด้งไปโชว์ข้อมูลผิดตัวแบบเงียบ ๆ โดยไม่แจ้งผู้ใช้) ให้เปลี่ยนไปแสดงหน้า "ไม่พบข้อมูลที่ต้องการ" แทน เมื่อหา `id` นั้นไม่เจอจริง ๆ
 > 3. ทดสอบ Fallback ที่แก้ไข โดยรันแอปบน Chrome (`flutter run -d chrome`) แล้วพิมพ์ URL `/explore/destinations/999` ตรง ๆ ใน Address Bar (เป็น `id` ที่ไม่มีอยู่จริง) — ต้องเห็นหน้า "ไม่พบข้อมูลที่ต้องการ" ไม่ใช่ Error สีแดงหรือข้อมูลผิดตัว
+
+บันทึกรูปผลการทดลอง
+```image
+บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ (กรณีที่ยังไม่สามารถรันได้ ให้ทดลองจนถึงขั้นตอนที่สามารถ capture รูปได้และบันทึกรูปไว้ในส่วนนี้)
+```
+
 
 #### ขั้นตอนที่ 5.2 — ตั้งค่า main.dart
 
@@ -1397,8 +1406,6 @@ class TravelApp extends StatelessWidget {
 
 ### การทดลองที่ 6 — รันและทดสอบ
 
-**เวลาโดยประมาณ:** 15 นาที
-
 #### ขั้นตอนที่ 6.1 — ตรวจสอบว่า Build ผ่าน
 
 ```bash
@@ -1428,7 +1435,7 @@ flutter devices
 
 #### ขั้นตอนที่ 6.3 — ทดสอบฟีเจอร์ต่าง ๆ
 
-ทดสอบตามรายการนี้และจด ✅ / ❌:
+ทดสอบตามรายการและบันทึกผลการทดลองด้วยเครื่องหมาย ✅ หรือ ❌:
 
 | # | สิ่งที่ทดสอบ | ผลที่คาดหวัง | ผลจริง |
 |---|---|---|---|
@@ -1455,9 +1462,7 @@ flutter devices
 > - **Android Emulator (จาก `avdmanager`):** กด `Ctrl+ลูกศรซ้าย` หรือ `Ctrl+ลูกศรขวา` เพื่อหมุนจอ
 > - **เครื่อง Android จริง:** หมุนตัวเครื่องโดยตรง (ต้องเปิด Auto-rotate ไว้)
 
-### การทดลองที่ 7 — ทดลองเพิ่มเติม (ถ้ามีเวลา)
-
-**เวลาโดยประมาณ:** 20 นาที
+### การทดลองที่ 7 — ทดลองเพิ่มเติม 
 
 #### ขั้นตอนที่ 7.1 — เพิ่ม Category Filter
 
@@ -1525,13 +1530,11 @@ GoRoute(
 
 ### การทดลองที่ 8 — โจทย์ท้าทาย: ทำ Saved Screen ให้ใช้งานได้จริง (Independent Challenge)
 
-**เวลาโดยประมาณ:** 40-60 นาที
-
 > ⚠️ **ส่วนนี้ไม่มีโค้ดตัวอย่างให้คัดลอก** ให้นักศึกษาออกแบบและเขียนเอง โดยใช้ความรู้เรื่อง Layout Widgets, Responsive Design และ Go Router ที่ฝึกมาตลอดใบงานนี้
 
-**โจทย์:** ปัจจุบันหน้า "บันทึกไว้" (`SavedScreen`) เป็นแค่ Static UI ที่ไม่มีข้อมูลจริง ให้ทำให้ฟีเจอร์นี้ **ใช้งานได้จริง** ตามข้อกำหนดต่อไปนี้:
+**โจทย์:** ปัจจุบันหน้า "บันทึกไว้" (`SavedScreen`) เป็นแค่ Static UI ที่ไม่มีข้อมูลจริง ให้ทำการเขียนโค้ดเพื่อทำให้ฟีเจอร์นี้ **ใช้งานได้จริง** ตามข้อกำหนดต่อไปนี้:
 
-1. **เพิ่มปุ่มบันทึก (Objective 1 & 3):** เพิ่ม Icon รูปหัวใจบน `DestinationCard` หรือ `DestinationDetailScreen` (เลือกจุดใดจุดหนึ่งหรือทั้งสองจุด) ให้กดแล้วสลับสถานะ "บันทึกแล้ว / ยังไม่บันทึก" ได้ โดยไอคอนต้องเปลี่ยนรูปตามสถานะ (เช่น `Icons.favorite` ↔ `Icons.favorite_border`)
+1. **เพิ่มปุ่มบันทึก :** เพิ่ม Icon รูปหัวใจบน `DestinationCard` หรือ `DestinationDetailScreen` (เลือกจุดใดจุดหนึ่งหรือทั้งสองจุด) ให้กดแล้วสลับสถานะ "บันทึกแล้ว / ยังไม่บันทึก" ได้ โดยไอคอนต้องเปลี่ยนรูปตามสถานะ (เช่น `Icons.favorite` ↔ `Icons.favorite_border`)
 
 2. **จัดการ State ที่ใช้ร่วมกันข้ามหน้า:** ข้อมูลว่า Destination ไหนถูกบันทึกไว้บ้าง ต้องเข้าถึงได้จากทั้ง Explore Screen, Detail Screen และ Saved Screen พร้อมกัน (คำใบ้: ลองสร้าง Class ง่าย ๆ เก็บ `Set<String> savedIds` ไว้เป็นตัวแปร Global หรือส่งผ่าน Constructor — ยังไม่ต้องใช้ State Management Library ใด ๆ ในระดับนี้)
 
@@ -1541,44 +1544,48 @@ GoRoute(
 
 5. **เขียน Comment อธิบายโค้ดของตัวเอง** อย่างน้อย 3 จุดที่คิดว่าซับซ้อนที่สุด เพื่อให้เพื่อนหรืออาจารย์อ่านเข้าใจการทำงานได้
 
-**เกณฑ์ตรวจ (สำหรับการทดลองที่ 8):**
+> 💡 **หลีกเลี่ยงการขอโค้ดทั้งไฟล์จาก AI** ให้ลองเขียนเองก่อน ถ้าติดจริง ๆ ให้ถามเป็นจุด ๆ ไป (เช่น "ทำไม setState ใน Widget อื่นไม่ทำให้ Saved Screen รีเฟรช") จะได้เรียนรู้มากกว่าการคัดลอกมาทั้งหมด
 
-| เกณฑ์ | คะแนน |
-|---|---|
-| กดบันทึก/ยกเลิกบันทึกได้ ไอคอนเปลี่ยนถูกต้อง | 25% |
-| Saved Screen แสดงรายการที่บันทึกจริง + มี Empty State | 25% |
-| Layout ปรับตามขนาดหน้าจอด้วย LayoutBuilder | 20% |
-| กดจาก Saved Screen ไป Detail ได้ถูกต้อง | 20% |
-| มี Comment อธิบายจุดสำคัญอย่างน้อย 3 จุด | 10% |
-
-> 💡 **หลีกเลี่ยงการขอโค้ดทั้งไฟล์จาก AI** ให้ลองเขียนเองก่อน ถ้าติดจริง ๆ ให้ถามเป็นจุด ๆ ไป (เช่น "ทำไม setState ใน Widget อื่นไม่ทำให้ Saved Screen รีเฟรช") จะได้เรียนรู้มากกว่าการคัดลอกทั้งดุ้น
-
+บันทึกรูปผลการทดลอง
+```image
+บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ 
+```
 ---
 
 ## 📝 คำถามท้ายใบงาน
 
-**ให้ตอบคำถามต่อไปนี้ในรายงาน:**
+**ตอบคำถามต่อไปนี้:**
 
-1. `LayoutBuilder` ต่างกับ `MediaQuery` อย่างไร? เลือกใช้อันไหนในสถานการณ์ใด?
+1. `LayoutBuilder` ต่างกับ `MediaQuery` อย่างไร? มีหลักการเลือกใช้แต่ละแบบในสถานการณ์ใด?
+```text
 
+```
 2. ทำไม Go Router ถึงใช้ `StatefulShellRoute` แทน `ShellRoute` ธรรมดา? ผลต่างเรื่อง State Management คืออะไร?
+```text
 
-3. ในโค้ด `DestinationCard` เราใช้ `Expanded` ครอบ `Text` ชื่อ Destination ทำไม? จะเกิดอะไรขึ้นถ้าลบออก?
+```
+3. ในโค้ด `DestinationCard` เหตุใดจึงใช้ `Expanded` ครอบ `Text` ชื่อ Destination ? จะเกิดอะไรขึ้นถ้าลบออก?
+```text
 
+```
 4. การส่งข้อมูลผ่าน `extra` ของ Go Router มีข้อจำกัดอะไรกรณี Deep Link / Web Refresh? และแก้ปัญหานี้ได้อย่างไร?
+```text
 
-5. วาด Navigation Hierarchy ของแอปนี้ (สามารถวาดบนกระดาษแล้วถ่ายรูป)
+```
+5. วาด Navigation Hierarchy ของแอปนี้ (สามารถวาดบนกระดาษแล้วถ่ายรูปส่งได้)
+```text
 
+```
 ---
 
 ## 📤 การส่งงาน
 
-1. Push โค้ดขึ้น GitHub Repository ส่วนตัว (Branch: `week04-layout-navigation`) — ต้องรวมโค้ดที่แก้จาก Checkpoint 3, 4.1, 4.3, 5.1 และการทดลองที่ 8 ด้วย
+1. Push โค้ดขึ้น GitHub Repository ส่วนตัว (Branch: `week04-layout-navigation`) 
 2. สร้าง Pull Request พร้อมเขียน Description ว่าทำอะไรไปบ้าง (รวมถึงสรุปสั้น ๆ ว่าการทดลองที่ 8 ทำอะไรสำเร็จบ้าง)
-3. แนบ Screenshot หรือ Screen Recording แสดง Navigation ที่ทำงานได้ รวมถึงฟีเจอร์ Saved จากการทดลองที่ 8
-4. ตอบคำถามท้ายใบงานใน Comment ของ Pull Request
+3. แนบ Screenshot หรือ Screen Recording แสดง Navigation ที่ทำงานได้ ให้ครบถ้วนตามใบงานการทดลอง
+4. ตอบคำถามท้ายใบงานการทดลองให้ครบถ้วน
 
-**Deadline:** ก่อนชั้นเรียนสัปดาห์ที่ 5
+**กำหนดส่ง:** ก่อนเรียนในสัปดาห์ถัดไป
 
 ---
 
