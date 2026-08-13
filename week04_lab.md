@@ -2268,9 +2268,9 @@ GoRoute(
 > 💡 **หลีกเลี่ยงการขอโค้ดทั้งไฟล์จาก AI** ให้ลองเขียนเองก่อน ถ้าติดจริง ๆ ให้ถามเป็นจุด ๆ ไป (เช่น "ทำไม setState ใน Widget อื่นไม่ทำให้ Saved Screen รีเฟรช") จะได้เรียนรู้มากกว่าการคัดลอกมาทั้งหมด
 
 บันทึกรูปผลการทดลอง
-```image
-บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ 
-```
+<img width="631" height="998" alt="image" src="https://github.com/user-attachments/assets/54733110-d6f7-49ce-80ea-954d1073ee72" />
+<img width="638" height="992" alt="image" src="https://github.com/user-attachments/assets/85a7d1b8-8eca-425b-b764-c82de3948fc7" />
+
 ---
 
 ## 📝 คำถามท้ายใบงาน
@@ -2278,23 +2278,39 @@ GoRoute(
 **ตอบคำถามต่อไปนี้:**
 
 1. `LayoutBuilder` ต่างกับ `MediaQuery` อย่างไร? มีหลักการเลือกใช้แต่ละแบบในสถานการณ์ใด?
-```text
+```
+MediaQuery วัดขนาดหน้าจออุปกรณ์ทั้งหมด ใช้เมื่อต้องการขนาดอ้างอิงกับจอจริง
+LayoutBuilder วัดขนาดพื้นที่ที่ Widget แม่อนุญาตให้ใช้ ใช้ทำ Responsive UI ที่สามารถนำไปใช้ซ้ำในพื้นที่ต่างๆ ได้
 
 ```
 2. ทำไม Go Router ถึงใช้ `StatefulShellRoute` แทน `ShellRoute` ธรรมดา? ผลต่างเรื่อง State Management คืออะไร?
-```text
+```
+เพราะ StatefulShellRoute ช่วยจดจำสถานะของแต่ละแท็บไว้ เมื่อกดสลับหน้าไปมา ข้อมูลและตำแหน่งหน้าจอจะยังอยู่เหมือนเดิม
+ถ้าใช้ ShellRoute หน้าจอจะถูกทำลายและโหลดใหม่ทุกครั้ง
 
 ```
 3. ในโค้ด `DestinationCard` เหตุใดจึงใช้ `Expanded` ครอบ `Text` ชื่อ Destination ? จะเกิดอะไรขึ้นถ้าลบออก?
-```text
-
+```
+เพื่อให้ข้อความยืดขยายได้พอดีกับพื้นที่และช่วยตัดคำเป็นจุดไข่ปลา ... อัตโนมัติ
+ถ้าลบออก หากข้อความยาวเกินไปจะทำให้เกิด Error ข้อความล้นทะลุขอบจอ
 ```
 4. การส่งข้อมูลผ่าน `extra` ของ Go Router มีข้อจำกัดอะไรกรณี Deep Link / Web Refresh? และแก้ปัญหานี้ได้อย่างไร?
-```text
+```
+ข้อจำกัดคือ เมื่อกด Refresh หน้าเว็บ หรือเข้าแอปผ่าน URL โดยตรง ข้อมูลที่ส่งผ่าน extra จะหายไปและมีค่าเป็น null
+มีวิธีแก้คือ ให้ดึงตัวแปร id จาก pathParameters ใน URL มาเป็นแผนสำรอง (Fallback) เพื่อใช้ค้นหาข้อมูลในระบบแทน
 
 ```
 5. วาด Navigation Hierarchy ของแอปนี้ (สามารถวาดบนกระดาษแล้วถ่ายรูปส่งได้)
-```text
+```
+GoRouter (Router Configuration)
+└── StatefulShellRoute (Bottom Navigation Wrapper)
+    ├── Branch 0: GoRoute path: '/'                  → HomeScreen
+    ├── Branch 1: GoRoute path: '/explore'           → ExploreScreen
+    │   └── GoRoute path: 'destinations/:id'         → DestinationDetailScreen (รับ param :id)
+    ├── Branch 2: GoRoute path: '/saved'             → SavedScreen
+    ├── Branch 3: GoRoute path: '/profile'           → ProfileScreen
+    └── Branch 4: GoRoute path: '/about'             → AboutScreen
+```[cite: 1]
 
 ```
 ---
