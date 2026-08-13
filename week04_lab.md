@@ -820,15 +820,11 @@ class _ExploreScreenState extends State<ExploreScreen> {
 > 1. เพิ่ม Breakpoint ระดับที่ 4 คือ **Large (≥ 1200 dp)** ให้ `crossAxisCount = 5`
 > 2. ใน `_buildGrid()` เพิ่มบรรทัด `final screenWidth = MediaQuery.of(context).size.width;` แล้วลองแสดงค่านี้เทียบกับ `constraints.maxWidth` ของ `LayoutBuilder` (เช่น พิมพ์ด้วย `print()` หรือแสดงเป็น `Text` ชั่วคราวบนหน้าจอ)
 > 3. สังเกตว่าค่าทั้งสองตัวเท่ากันหรือไม่ แล้วเขียนสรุป 2-3 บรรทัดเป็น Comment ในโค้ดว่า `MediaQuery.of(context).size.width` (ความกว้างของทั้งหน้าจอ) กับ `LayoutBuilder` `constraints.maxWidth` (ความกว้างที่ Widget นั้น ๆ ได้รับจาก Parent) ต่างกันอย่างไร และควรเลือกใช้ตัวไหนเมื่อไหร่
-> ข้อ 3 สรุปความแตกต่าง
-  MediaQuery.of(context).size.width คือความกว้างของ "หน้าจออุปกรณ์ทั้งหมด"
-  ส่วน constraints.maxWidth คือความกว้างของ "พื้นที่ที่ Widget นี้ได้รับอนุญาตให้ใช้" จาก Parent
-  เราควรใช้ LayoutBuilder (constraints) ในการจัด Layout ภายใน เพื่อให้คอมโพเนนต์ของเรายืดหยุ่นและจัดเรียงตัวได้ถูกต้องแม้จะถูกนำไปวางในพื้นที่ที่ไม่ได้เต็มจอ
+> 
 
 บันทึกรูปผลการทดลอง
-```image
-บันทึกรูปโค้ด และรูปผลการทดลองที่นี่ (กรณีที่ยังไม่สามารถรันได้ ให้ทดลองจนถึงขั้นตอนที่สามารถ capture รูปได้และบันทึกรูปไว้ในส่วนนี้)
-```
+<img width="1919" height="1024" alt="image" src="https://github.com/user-attachments/assets/b18885b4-dc2c-41ab-acd2-b4d30a3cfb23" />
+บันทึกโค้ดการผลการทดลอง
 ```
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -898,15 +894,21 @@ class _ExploreScreenState extends State<ExploreScreen> {
   }
 
   Widget _buildGrid() {
-    // 🎯 Checkpoint 4.1 (ข้อ 2) ดึงค่าความกว้างหน้าจอจาก MediaQuery มาเทียบ
+    // 🎯 Checkpoint 4.1 (ข้อ 2): ดึงค่าความกว้างหน้าจอจาก MediaQuery มาเทียบ
     final screenWidth = MediaQuery.of(context).size.width;
 
     return LayoutBuilder(
       builder: (context, constraints) {
         
-        // 🎯 Checkpoint 4.1 (ข้อ 2)
+        // 🎯 Checkpoint 4.1 (ข้อ 2): พิมพ์ค่าออกมาดูใน Debug Console
         print('MediaQuery width: $screenWidth, LayoutBuilder maxWidth: ${constraints.maxWidth}');
         
+        /* 🎯 Checkpoint 4.1 (ข้อ 3): สรุปความแตกต่าง
+           MediaQuery.of(context).size.width คือความกว้างของ "หน้าจออุปกรณ์ทั้งหมด"
+           ส่วน constraints.maxWidth คือความกว้างของ "พื้นที่ที่ Widget นี้ได้รับอนุญาตให้ใช้" จาก Parent
+           เราควรใช้ LayoutBuilder (constraints) ในการจัด Layout ภายใน เพื่อให้คอมโพเนนต์ของเรายืดหยุ่น
+           และจัดเรียงตัวได้ถูกต้องแม้จะถูกนำไปวางในพื้นที่ที่ไม่ได้เต็มจอ (เช่น วางข้างๆ เมนูซ้ายมือ)
+        */
 
         int crossAxisCount;
         if (constraints.maxWidth < 600) {
